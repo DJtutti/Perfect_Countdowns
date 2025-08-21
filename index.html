@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <title>Perfect Countdowns   public</title>
+  <title>Perfect Countdowns   private</title>
   <style>
     :root {
       --bg-light: #ffffff;
@@ -162,19 +162,33 @@
     }
 
     .hidden {
-      display: none !important;
+      display: none;
     }
 
-    .cols-1 { grid-template-columns: 1fr; }
-    .cols-2 { grid-template-columns: repeat(2, 1fr); }
-    .cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .cols-4 { grid-template-columns: repeat(4, 1fr); }
-    .cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cols-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
   </style>
 </head>
 <body>
   <div id="topBar">
-    <form id="countdownForm" class="hidden">
+    <form id="countdownForm">
       <input type="text" id="title" placeholder="Nome do evento" required />
       <input type="datetime-local" id="date" required />
       <input type="color" id="color" value="#007BFF" />
@@ -182,34 +196,27 @@
       <button type="submit">Adicionar</button>
     </form>
 
-    <div id="controls" class="hidden">
+    <div id="controls">
+      <button id="modeToggle" onclick="toggleMode()">☀</button>
       <button onclick="setColumns(1)">☰</button>
       <button onclick="setColumns(2)">2</button>
       <button onclick="setColumns(3)">3</button>
       <button onclick="setColumns(4)">4</button>
       <button onclick="setColumns(5)">☷</button>
     </div>
-
-    <button id="creatorUnlock" onclick="requestPIN()">🔒 Criador (DJ_tutti)</button>
-    <button id="modeToggle" onclick="toggleMode()">☀</button>
   </div>
 
   <div id="countdownContainer" class="countdown-container cols-3"></div>
 
   <script>
-    const PIN = "0955";
-    let canEdit = false;
-
     const form = document.getElementById('countdownForm');
     const container = document.getElementById('countdownContainer');
     const modeToggle = document.getElementById('modeToggle');
-    const creatorBtn = document.getElementById('creatorUnlock');
-    const controls = document.getElementById('controls');
 
-    const STORAGE_KEY = "countdowns_public";
+    const STORAGE_KEY = "countdowns_private";
     let countdowns = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let columnCount = 3;
-    let savedColumns = localStorage.getItem("countdown_columns_public");
+    let savedColumns = localStorage.getItem("countdown_columns_private");
     if (savedColumns) {
       columnCount = parseInt(savedColumns);
       container.className = `countdown-container cols-${columnCount}`;
@@ -222,21 +229,7 @@
     function setColumns(n) {
       columnCount = n;
       container.className = `countdown-container cols-${n}`;
-      localStorage.setItem("countdown_columns_public", n); // 👈 salva a escolha
-    }
-
-    function requestPIN() {
-      const entered = prompt("Introduz o PIN para editar:");
-      if (entered === PIN) {
-        canEdit = true;
-        alert("Acesso concedido.");
-        creatorBtn.classList.add("hidden");
-        form.classList.remove("hidden");
-        controls.classList.remove("hidden");
-        updateCountdowns();
-      } else {
-        alert("PIN incorreto.");
-      }
+      localStorage.setItem("countdown_columns_private", n);
     }
 
     function removeCountdown(index) {
@@ -252,7 +245,12 @@
       const newColor = prompt("Nova cor (#hex):", cd.color) || cd.color;
       const newTextColor = prompt("Nova cor do texto (#hex):", cd.textColor || '#ffffff') || cd.textColor;
 
-      countdowns[index] = { title: newTitle, date: newDate, color: newColor, textColor: newTextColor };
+      countdowns[index] = {
+        title: newTitle,
+        date: newDate,
+        color: newColor,
+        textColor: newTextColor
+      };
       saveCountdowns();
       updateCountdowns();
     }
@@ -262,13 +260,13 @@
 
       const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
       const msPerDay = 1000 * 60 * 60 * 24;
-
+      
       const months = Math.floor(diff / msPerMonth);
       const days = Math.floor((diff % msPerMonth) / msPerDay);
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
-      
+
       return `
         ${months > 0 ? `<span class="num">${months}</span><span class="unit">M</span>` : ''}
         ${days > 0 ? `<span class="num">${days}</span><span class="unit">d</span>` : ''}
@@ -292,35 +290,17 @@
         div.style.color = cd.textColor || '#ffffff';
 
         div.innerHTML = `
+          <button class="edit-btn" onclick="editCountdown(${i})">✏️</button>
+          <button class="remove-btn" onclick="removeCountdown(${i})">❌</button>
           <div class="title">${cd.title}</div>
           <div class="time">${formatTime(diff)}</div>
         `;
-
-        if (canEdit) {
-          const editBtn = document.createElement("button");
-          editBtn.className = "edit-btn";
-          editBtn.textContent = "✏️";
-          editBtn.onclick = () => editCountdown(i);
-          div.appendChild(editBtn);
-
-          const removeBtn = document.createElement("button");
-          removeBtn.className = "remove-btn";
-          removeBtn.textContent = "❌";
-          removeBtn.onclick = () => removeCountdown(i);
-          div.appendChild(removeBtn);
-        }
-
         container.appendChild(div);
       });
     }
 
     form.addEventListener('submit', e => {
       e.preventDefault();
-      if (!canEdit) {
-        alert("Apenas o criador pode adicionar eventos.");
-        return;
-      }
-
       const title = document.getElementById('title').value;
       const date = document.getElementById('date').value;
       const color = document.getElementById('color').value;
@@ -339,39 +319,7 @@
     setInterval(updateCountdowns, 1000);
     updateCountdowns();
   </script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-  
-    const firebaseConfig = {
-      apiKey: "AIzaSyC5PRsrlWsXxWvAN0butuC8jL81xveS9UI",
-      authDomain: "perfect-countdowns---public.firebaseapp.com",
-      projectId: "perfect-countdowns---public",
-      storageBucket: "perfect-countdowns---public.firebasestorage.app",
-      messagingSenderId: "61334374176",
-      appId: "1:61334374176:web:ba7639dd7ad676c300b945",
-      measurementId: "G-FSNPFQD8BH"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const countdownsRef = collection(db, "countdowns");
-
-    // Atualiza a interface sempre que houver alterações na base de dados
-    onSnapshot(countdownsRef, (snapshot) => {
-      const container = document.getElementById("countdownContainer");
-      container.innerHTML = "";
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "countdown";
-        div.innerHTML = `
-          <div class="title">${data.title}</div>
-          <div class="date">${data.date} ${data.time}</div>
-        `;
-        container.appendChild(div);
-      });
-    });
-  </script>
 </body>
 </html>
+
+
