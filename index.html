@@ -258,26 +258,48 @@
     function formatTime(diff) {
       if (diff <= 0) return 'Finished!';
       
-      const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
-      const msPerDay = 1000 * 60 * 60 * 24;
+      // Base de conversão
+      const msPerSecond = 1000;
+      const msPerMinute = 60 * msPerSecond;
+      const msPerHour   = 60 * msPerMinute;
+      const msPerDay    = 24 * msPerHour;
+      const msPerMonth  = 30.44 * msPerDay;
+      const msPerYear   = 365.25 * msPerDay;
       
-      const months = Math.floor(diff / msPerMonth);
-      const days = Math.floor((diff % msPerMonth) / msPerDay);
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
+      // Cálculo das unidades (totais acumulados)
+      const years   = diff / msPerYear;
+      const months  = diff / msPerMonth;
+      const days    = diff / msPerDay;
+      const hours   = diff / msPerHour;
+      const minutes = diff / msPerMinute;
+      const seconds = diff / msPerSecond;
       
-      // mostra segundos apenas se faltar 12h ou menos
-      const showSeconds = diff <= 12 * 60 * 60 * 1000;
-
+      // Definir visibilidade de cada unidade (mesmo esquema anterior)
+      const showSeconds = diff <= 36 * msPerHour;
+      const showMinutes = diff >= 15 * msPerSecond && diff <= 30.44 * msPerDay;
+      const showHours   = diff >= 30 * msPerMinute && diff <= 9 * msPerMonth;
+      const showDays    = diff >= 18 * msPerHour && diff <= 5 * msPerYear;
+      const showMonths  = diff >= 30.44 * msPerDay && diff <= 2.5 * 10 * 12 * msPerMonth;
+      const showYears   = diff >= 18 * msPerMonth;
+      
+      // Lógica acumulativa: unidade inferior aparece se unidade superior visível
+      const displayYears  = showYears;
+      const displayMonths = showMonths || displayYears;
+      const displayDays   = showDays   || displayMonths;
+      const displayHours  = showHours  || displayDays;
+      const displayMinutes= showMinutes|| displayHours;
+      const displaySeconds= showSeconds|| displayMinutes;
+      
       return `
-        ${months > 0 ? `<span class="num">${months}</span><span class="unit">M</span>` : ''}
-        ${days > 0 ? `<span class="num">${days}</span><span class="unit">d</span>` : ''}
-        <span class="num">${hours}</span><span class="unit">h</span>
-        <span class="num">${minutes}</span><span class="unit">m</span>
-        ${showSeconds ? `<span class="num">${seconds}</span><span class="unit">s</span>` : ''}
+        ${displayYears   ? `<span class="num">${Math.floor(years)}</span><span class="unit">a</span>` : ''}
+        ${displayMonths  ? `<span class="num">${Math.floor(months)}</span><span class="unit">M</span>` : ''}
+        ${displayDays    ? `<span class="num">${Math.floor(days)}</span><span class="unit">d</span>` : ''}
+        ${displayHours   ? `<span class="num">${Math.floor(hours)}</span><span class="unit">h</span>` : ''}
+        ${displayMinutes ? `<span class="num">${Math.floor(minutes)}</span><span class="unit">m</span>` : ''}
+        ${displaySeconds ? `<span class="num">${Math.floor(seconds)}</span><span class="unit">s</span>` : ''}
       `;
     }
+
 
 
     function updateCountdowns() {
@@ -325,6 +347,7 @@
   </script>
 </body>
 </html>
+
 
 
 
