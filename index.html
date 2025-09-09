@@ -256,44 +256,44 @@
     }
 
     function formatTime(diff) {
-  if (diff <= 0) return 'Finished!';
+      if (diff <= 0) return 'Finished!';
+      
+      // Bases de conversão
+      const msPerSecond = 1000;
+      const msPerMinute = 60 * msPerSecond;
+      const msPerHour   = 60 * msPerMinute;
+      const msPerDay    = 24 * msPerHour;
+      const msPerMonth  = 30.44 * msPerDay;
+      const msPerYear   = 365.25 * msPerDay;
+      
+      // Flags de visibilidade baseado no diff total
+      const showSeconds = diff <= 36 * msPerHour;
+      const showMinutes = diff >= 15 * msPerSecond && diff <= 30.44 * msPerDay;
+      const showHours   = diff >= 30 * msPerMinute && diff <= 9 * msPerMonth;
+      const showDays    = diff >= 18 * msPerHour && diff <= 5 * msPerYear;
+      const showMonths  = diff >= 30.44 * msPerDay && diff <= 2.5 * 10 * 12 * msPerMonth;
+      const showYears   = diff >= 18 * msPerMonth;
+      
+      // Totais acumulados
+      const totalSeconds = Math.floor(diff / msPerSecond);
+      const totalMinutes = Math.floor(diff / msPerMinute);
+      const totalHours   = Math.floor(diff / msPerHour);
+      const totalDays    = Math.floor(diff / msPerDay);
+      const totalMonths  = Math.floor(diff / msPerMonth);
+      const totalYears   = Math.floor(diff / msPerYear);
+      
+      let html = '';
 
-  // Bases de conversão
-  const msPerSecond = 1000;
-  const msPerMinute = 60 * msPerSecond;
-  const msPerHour   = 60 * msPerMinute;
-  const msPerDay    = 24 * msPerHour;
-  const msPerMonth  = 30.44 * msPerDay;
-  const msPerYear   = 365.25 * msPerDay;
-
-  // Flags de visibilidade baseado no diff total
-  const showSeconds = diff <= 36 * msPerHour;
-  const showMinutes = diff >= 15 * msPerSecond && diff <= 30.44 * msPerDay;
-  const showHours   = diff >= 30 * msPerMinute && diff <= 9 * msPerMonth;
-  const showDays    = diff >= 18 * msPerHour && diff <= 5 * msPerYear;
-  const showMonths  = diff >= 30.44 * msPerDay && diff <= 2.5 * 10 * 12 * msPerMonth;
-  const showYears   = diff >= 18 * msPerMonth;
-
-  // Totais acumulados
-  const totalSeconds = Math.floor(diff / msPerSecond);
-  const totalMinutes = Math.floor(diff / msPerMinute);
-  const totalHours   = Math.floor(diff / msPerHour);
-  const totalDays    = Math.floor(diff / msPerDay);
-  const totalMonths  = Math.floor(diff / msPerMonth);
-  const totalYears   = Math.floor(diff / msPerYear);
-
-  let html = '';
-
-  // Hierarquia e resto/total
-  if (showYears)   html += `<span class="num">${totalYears}</span><span class="unit">a</span>`;
-  if (showMonths)  html += `<span class="num">${showYears ? totalMonths % 12 : totalMonths}</span><span class="unit">M</span>`;
-  if (showDays)    html += `<span class="num">${showMonths ? totalDays % 30 : totalDays}</span><span class="unit">d</span>`;
-  if (showHours)   html += `<span class="num">${showDays ? totalHours % 24 : totalHours}</span><span class="unit">h</span>`;
-  if (showMinutes) html += `<span class="num">${showHours ? totalMinutes % 60 : totalMinutes}</span><span class="unit">m</span>`;
-  if (showSeconds) html += `<span class="num">${showMinutes ? totalSeconds % 60 : totalSeconds}</span><span class="unit">s</span>`;
-
-  return html;
-}
+      // Hierarquia e resto/total
+      if (showYears)   html += `<span class="num">${totalYears}</span><span class="unit">anos</span>`;
+      if (showMonths)  html += `<span class="num">${showYears ? totalMonths % 12 : totalMonths}</span><span class="unit">M</span>`;
+      if (showDays)    html += `<span class="num">${showMonths ? totalDays % 30 : totalDays}</span><span class="unit">d</span>`;
+      if (showHours)   html += `<span class="num">${showDays ? totalHours % 24 : totalHours}</span><span class="unit">h</span>`;
+      if (showMinutes) html += `<span class="num">${showHours ? totalMinutes % 60 : totalMinutes}</span><span class="unit">m</span>`;
+      if (showSeconds) html += `<span class="num">${showMinutes ? totalSeconds % 60 : totalSeconds}</span><span class="unit">s</span>`;
+      
+      return html;
+    }
 
 
 
@@ -343,6 +343,7 @@
   </script>
 </body>
 </html>
+
 
 
 
