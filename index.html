@@ -285,7 +285,7 @@
       let html = '';
 
       // Hierarquia e resto/total
-      if (showYears)   html += `<span class="num">${totalYears}</span><span class="unit">anos</span>`;
+      if (showYears)   html += `<span class="num">${totalYears}</span><span class="unit">year</span>`;
       if (showMonths)  html += `<span class="num">${showYears ? totalMonths % 12 : totalMonths}</span><span class="unit">M</span>`;
       if (showDays)    html += `<span class="num">${showMonths ? totalDays % 30 : totalDays}</span><span class="unit">d</span>`;
       if (showHours)   html += `<span class="num">${showDays ? totalHours % 24 : totalHours}</span><span class="unit">h</span>`;
@@ -343,9 +343,6 @@
   </script>
 </body>
 </html>
-
-
-
 
 
 
