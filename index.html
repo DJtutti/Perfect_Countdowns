@@ -184,6 +184,18 @@
     .cols-5 {
       grid-template-columns: repeat(5, 1fr);
     }
+    
+    #versionFooter {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85em;
+      opacity: 0.6;
+      pointer-events: none;
+      color: inherit;
+    }
+
   </style>
 </head>
 <body>
@@ -341,8 +353,10 @@
     setInterval(updateCountdowns, 1000);
     updateCountdowns();
   </script>
+  <footer id="versionFooter">Perfect Countdowns - version 1.0</footer>
 </body>
 </html>
+
 
 
 
