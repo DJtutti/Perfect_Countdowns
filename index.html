@@ -381,6 +381,8 @@
     
     document.getElementById("orderToggle").addEventListener("click", () => {
       orderByDate = !orderByDate;
+      // atualiza o símbolo do botão
+      document.getElementById("orderToggle").textContent = orderByDate ? "◴" : "▣";
       updateCountdowns();
     });
     
@@ -390,6 +392,7 @@
   <footer id="versionFooter">Perfect Countdowns - version 1.0</footer>
 </body>
 </html>
+
 
 
 
