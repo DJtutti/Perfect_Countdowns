@@ -245,7 +245,17 @@
     const form = document.getElementById('countdownForm');
     const container = document.getElementById('countdownContainer');
     const modeToggle = document.getElementById('modeToggle');
-    let orderByDate = false;
+
+    // 🔹 ler persistência do toggle de ordem
+    let orderByDate = localStorage.getItem("orderByDate") === "true";
+    
+    // atualizar símbolo do botão ao carregar a página
+    document.addEventListener("DOMContentLoaded", () => {
+      const orderToggle = document.getElementById("orderToggle");
+      if (orderToggle) {
+        orderToggle.textContent = orderByDate ? "◴" : "▣";
+      }
+    });
     
     const STORAGE_KEY = "countdowns_private";
     let countdowns = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -383,6 +393,7 @@
       orderByDate = !orderByDate;
       // atualiza o símbolo do botão
       document.getElementById("orderToggle").textContent = orderByDate ? "◴" : "▣";
+      localStorage.setItem("orderByDate", orderByDate ? "true" : "false"); // 🔥 guardar
       updateCountdowns();
     });
     
@@ -392,6 +403,7 @@
   <footer id="versionFooter">Perfect Countdowns - version 1.0</footer>
 </body>
 </html>
+
 
 
 
