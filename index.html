@@ -213,6 +213,8 @@
     }
     
   </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 </head>
 <body>
   <div id="topBar">
@@ -236,6 +238,8 @@
       <f> </f>
       <f> </f>
       <button id="orderToggle" title="Alterar ordem">⇅</button>
+      <button id="googleImportBtn">📅</button>
+
     </div>
   </div>
 
@@ -399,7 +403,104 @@
     
     setInterval(updateCountdowns, 1000);
     updateCountdowns();
+    /* ---------------- GOOGLE CALENDAR IMPORT ---------------- */
+    
+    const CLIENT_ID = "395439855507-4hk1bj3v9c5q0cvf72jptbje9e278i1h.apps.googleusercontent.com"; // substitui pelo teu client ID
+    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+    const MAX_EVENTS = 10; // quantos eventos importar
+    
+    let googleTokenClient;
+    let googleAccessToken = null;
+    
+    // inicializa o cliente OAuth
+    function initGoogleClient() {
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (resp) => {
+          if (resp.error) {
+            console.error("Erro ao obter token:", resp);
+            return;
+          }
+          googleAccessToken = resp.access_token;
+          console.log("✔ Token obtido, a importar eventos...");
+          fetchGoogleEvents(MAX_EVENTS);
+        }
+      });
+    }
+    
+    // pede autorização ao utilizador
+    function requestGoogleAccess() {
+      if (!googleTokenClient) initGoogleClient();
+      googleTokenClient.requestAccessToken();
+    }
+    
+    // buscar eventos futuros do calendário principal
+    async function fetchGoogleEvents(n) {
+      if (!googleAccessToken) return alert("Sem acesso. Faz login no Google primeiro.");
+    
+      const now = new Date().toISOString();
+      const params = new URLSearchParams({
+        maxResults: n,
+        orderBy: "startTime",
+        singleEvents: "true",
+        timeMin: now
+      });
+    
+      const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`, {
+        headers: { Authorization: `Bearer ${googleAccessToken}` }
+      });
+    
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Erro API Calendar:", txt);
+        alert("Erro ao obter eventos do Google Calendar.");
+        return;
+      }
+    
+      const data = await res.json();
+      const items = data.items || [];
+    
+      // converter para formato do Perfect Countdowns
+      const imported = items.map(ev => {
+        const start = ev.start?.dateTime || ev.start?.date;
+        const iso = start.length === 10 ? start + "T00:00:00" : start;
+        return {
+          title: ev.summary || "(Sem título)",
+          date: iso,
+          color: "#007BFF",
+          textColor: "#ffffff",
+          fromGoogle: true,
+          googleEventId: ev.id
+        };
+      });
+    
+      // evitar duplicados (por ID)
+      const existingIds = new Set(countdowns.filter(c => c.googleEventId).map(c => c.googleEventId));
+      let added = 0;
+      for (const ev of imported) {
+        if (!existingIds.has(ev.googleEventId)) {
+          countdowns.push(ev);
+          added++;
+        }
+      }
+    
+      saveCountdowns();
+      updateCountdowns();
+      alert(`✅ ${added} evento(s) importado(s) do Google Calendar.`);
+    }
+    
+    // associar botão ao login/import
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("googleImportBtn");
+      if (btn) {
+        btn.title = "Importar eventos do Google Calendar";
+        btn.addEventListener("click", requestGoogleAccess);
+      }
+    });
+
   </script>
   <footer id="versionFooter">Perfect Countdowns - version 1.0</footer>
 </body>
 </html>
+
