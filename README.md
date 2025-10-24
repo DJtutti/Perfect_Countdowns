@@ -1,4 +1,5 @@
-# NEW    Version   2.0
+## NEW! 
+#   version   2.0
 
 ### `Google Calendar Import`
 
